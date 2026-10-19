@@ -42,7 +42,7 @@ Windows 11 + Node 24 上验证。
 
 1. 把本仓库克隆到任意目录：
    ```bash
-   git clone https://github.com/QIRONGSHENG/dsh-tray-restart.git
+   git clone https://github.com/QIRSHENG/dsh-tray-restart.git
    ```
 2. 打开 DeepSeek Harness → 设置 → 插件，选择“从本地目录安装”，指向克隆下来的
    `dsh-tray-restart` 目录（就是含 `package.json` 的那一层）。
@@ -54,7 +54,7 @@ Windows 11 + Node 24 上验证。
 **方式二：CLI（非桌面端独占的 profile）**
 
 ```bash
-dsh plugin --profile <profile> add github:QIRONGSHENG/dsh-tray-restart
+dsh plugin --profile <profile> add github:QIRSHENG/dsh-tray-restart
 # 或本地目录
 dsh plugin --profile <profile> add C:\path\to\dsh-tray-restart
 ```
