@@ -156,4 +156,4 @@ node lib/patcher.mjs apply --dry-run --json
 
 ## License
 
-MIT License © 2026 QIRONGSHENG
+MIT License © 2026 Paint-RS
