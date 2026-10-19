@@ -35,17 +35,28 @@ DeepSeek Harness desktop shell, and re-applies the patch after every desktop upd
 
 ## 安装 / Install
 
-需要 DSH 桌面端 **0.2.x（Windows）**。
+需要 DSH 桌面端 **0.2.x（Windows）**。已在 `@deepseek-ai/dsh-desktop` 0.2.1-rc.2 +
+Windows 11 + Node 24 上验证。
+
+**方式一：插件管理器（桌面端推荐）**
+
+1. 把本仓库克隆到任意目录：
+   ```bash
+   git clone https://github.com/QIRONGSHENG/dsh-tray-restart.git
+   ```
+2. 打开 DeepSeek Harness → 设置 → 插件，选择“从本地目录安装”，指向克隆下来的
+   `dsh-tray-restart` 目录（就是含 `package.json` 的那一层）。
+3. 安装完成后 **完全退出并重新打开** DeepSeek Harness。
+
+桌面端 profile 由 Electron 应用独占管理，`dsh plugin --profile desktop ...` 会被拒绝，
+所以桌面端请走插件管理器（或由 agent 调用 `plugin_manager` 的 `install_bundle`）。
+
+**方式二：CLI（非桌面端独占的 profile）**
 
 ```bash
-# 直接从 GitHub 安装这个 bundle
-dsh plugin add github:QIRONGSHENG/dsh-tray-restart
-```
-
-或把仓库克隆到本地后安装目录：
-
-```bash
-dsh plugin add C:\path\to\dsh-tray-restart
+dsh plugin --profile <profile> add github:QIRONGSHENG/dsh-tray-restart
+# 或本地目录
+dsh plugin --profile <profile> add C:\path\to\dsh-tray-restart
 ```
 
 安装完成后 **完全退出并重新打开** DeepSeek Harness。桌面端主进程代码只在启动时加载，
@@ -101,8 +112,8 @@ node lib/patcher.mjs restore         # 写回安装前的原始 main.js
 # 1. 先还原托盘菜单
 node lib/patcher.mjs restore
 
-# 2. 移除插件 bundle
-dsh plugin remove dsh-tray-restart
+# 2. 移除插件（桌面端：在插件管理器里移除；其它 profile 用 CLI）
+dsh plugin --profile <profile> remove dsh-tray-restart
 ```
 
 如果 `restore` 报 `size-mismatch`（桌面端版本已经变化），直接重新安装官方桌面端即可。
@@ -137,6 +148,7 @@ icon.svg            插件图标
 
 ```bash
 node --check index.js
+node --test test/patcher.test.mjs     # 用合成 asar 验证打补丁/还原
 node lib/patcher.mjs apply --dry-run --json
 ```
 
