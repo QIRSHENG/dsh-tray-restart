@@ -18,7 +18,9 @@ import { apply, buildPatched, restore, status } from '../lib/patcher.mjs'
 
 /** A minimal main.js carrying the stock tray template. */
 const STOCK_MAIN = `import { app, Menu, Tray } from "electron";
+/** Windows system tray: the always-present way back to a hidden window and the explicit quit entry. */
 var DesktopTray = class {
+	/** Rebuild the tooltip and context menu in the current locale. */
 	relabel() {
 		const { messages } = this.options.locale();
 		tray.setContextMenu(Menu.buildFromTemplate([
@@ -98,7 +100,29 @@ test('buildPatched keeps the byte length and is idempotent', () => {
   const text = first.bytes.toString('utf8')
   assert.match(text, /restartAppHostMenu/)
   assert.match(text, /app\.relaunch\(\);quitWithoutConfirmation\(\)/)
+  assert.match(text, /reloadPageMenu/)
+  assert.match(text, /webContents\.reload\(\)/)
   assert.equal(buildPatched(first.bytes).state, 'patched')
+})
+
+test('upgrades a 1.0.x restart-only patch in place', () => {
+  const stock = Buffer.from(STOCK_MAIN, 'utf8')
+  const V1_CALL = 'tray.setContextMenu(Menu.buildFromTemplate([{label:messages.openApplication,' +
+    'click:this.options.open},{label:messages.restartAppHostMenu,' +
+    'click:()=>{app.relaunch();quitWithoutConfirmation()}},{type:"separator"},' +
+    '{label:messages.quitApplication,click:this.options.quit}]));'
+  const stockCall = stock.toString('utf8').match(/tray\.setContextMenu\(Menu\.buildFromTemplate\(\[[\s\S]{0,2000}?\]\)\);/)[0]
+  let v1Text = stock.toString('utf8').replace(stockCall, V1_CALL)
+  v1Text += ' '.repeat(stock.length - Buffer.byteLength(v1Text, 'utf8'))
+  const v1 = Buffer.from(v1Text, 'utf8')
+
+  const upgraded = buildPatched(v1)
+  assert.equal(upgraded.state, 'stock')
+  assert.equal(upgraded.bytes.length, v1.length)
+  const text = upgraded.bytes.toString('utf8')
+  assert.match(text, /messages\.restartAppHostMenu/)
+  assert.match(text, /messages\.reloadPageMenu/)
+  assert.equal(buildPatched(upgraded.bytes).state, 'patched')
 })
 
 test('apply patches, refreshes integrity, and leaves other entries intact', () => {

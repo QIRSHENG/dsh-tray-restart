@@ -1,12 +1,14 @@
 # dsh-tray-restart
 
-给 **DeepSeek Harness 官方桌面端** 的 Windows 系统托盘（任务栏通知区）右键菜单加一项
-**「重启应用与 Host」**，并在桌面端每次自动更新覆盖 `app.asar` 之后自动重打补丁。
+给 **DeepSeek Harness 官方桌面端** 的 Windows 系统托盘（任务栏通知区）右键菜单加两项：
+**「重启应用与 Host」** 和 **「刷新页面」**（刷新前端），并在桌面端每次自动更新覆盖
+`app.asar` 之后自动重打补丁。
 
-Adds a **Restart App and Host** item to the Windows system-tray menu of the official
-DeepSeek Harness desktop shell, and re-applies the patch after every desktop update.
+Adds **Restart App and Host** and **Reload Page** (refresh the frontend) items to the
+Windows system-tray menu of the official DeepSeek Harness desktop shell, and re-applies
+the patch after every desktop update.
 
-![tray menu: Open / Restart App and Host / Exit](https://img.shields.io/badge/tray%20menu-Open%20%7C%20Restart%20App%20and%20Host%20%7C%20Exit-6ea8fe)
+![tray menu: Open / Restart App and Host / Reload Page / Exit](https://img.shields.io/badge/tray%20menu-Open%20%7C%20Restart%20%7C%20Reload%20Page%20%7C%20Exit-6ea8fe)
 
 ---
 
@@ -25,13 +27,18 @@ DeepSeek Harness desktop shell, and re-applies the patch after every desktop upd
 ```
 打开 DeepSeek Harness
 重启应用与 Host          ← 新增
+刷新页面                 ← 新增（刷新前端，Host 不重启）
 ────────────
 退出 DeepSeek Harness
 ```
 
-点击后执行 `app.relaunch(); quitWithoutConfirmation()`，与官方开发版应用菜单里的同名项一致：
-干净退出 Host、重启整个应用，不弹“任务仍在运行”的确认框。文案复用官方已有的
-`messages.restartAppHostMenu`，中英文随系统语言切换。
+* **重启应用与 Host**：执行 `app.relaunch(); quitWithoutConfirmation()`，与官方开发版应用菜单
+  里的同名项一致——干净退出 Host、重启整个应用，不弹“任务仍在运行”的确认框。
+* **刷新页面**：对主窗口执行 `webContents.reload()`，等价于前台按 `Ctrl+R`。只重载前端页面，
+  Host、会话和正在跑的任务都不受影响；前端改坏了、白屏或要重新加载界面时用。
+
+两项都复用官方已有的本地化文案（`messages.restartAppHostMenu` / `messages.reloadPageMenu`），
+中英文随系统语言切换。
 
 ## 安装 / Install
 
@@ -73,10 +80,12 @@ DSH 插件跑在 Host 子进程里（Cordis），而系统托盘属于 **Electro
 
 补丁的设计约束：
 
-* **等长改写**：托盘菜单模板被压紧，插入重启项后用尾部空白补齐，`/lib/main.js` 的
+* **等长改写**：托盘菜单模板被压紧，插入两项后用尾部空白补齐，`/lib/main.js` 的
   字节数完全不变 → asar 头里其它文件的 `offset` 全部保持有效。
-* **只改一处**：仅 `DesktopTray.relabel()` 的 `tray.setContextMenu(...)` 模板；锚点不唯一、
-  结构不认识或长度会变大时 **拒绝写入**。
+* **只改托盘这一处**：仅 `DesktopTray.relabel()` 的 `tray.setContextMenu(...)` 模板；
+  为腾出字节会同时压缩两段纯注释（不改变任何行为）。锚点不唯一、结构不认识或长度
+  会变大时 **拒绝写入**。
+* **可升级旧补丁**：1.0.x 只加了重启项；1.1.0 会把旧补丁原地升级成「重启 + 刷新」两项。
 * **同步完整性摘要**：同时刷新 asar 目录里 `/lib/main.js` 的 SHA-256（等长 hex），
   即使 `EnableEmbeddedAsarIntegrityValidation` 被打开也不会失配。
 * **可回滚**：首次写入前把原始 `/lib/main.js` 保存到

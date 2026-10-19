@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "托盘重启项",
-    "description": "给官方桌面端 Windows 系统托盘右键菜单加一项「重启应用与 Host」，并在桌面端每次更新覆盖 app.asar 后自动重打补丁。"
+    "title": "托盘重启与刷新",
+    "description": "给官方桌面端 Windows 系统托盘右键菜单加「重启应用与 Host」和「刷新页面」两项，并在桌面端每次更新覆盖 app.asar 后自动重打补丁。"
   }
 }

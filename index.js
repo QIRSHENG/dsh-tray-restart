@@ -1,5 +1,5 @@
 /**
- * dsh-tray-restart — add a "Restart" item to the DeepSeek Harness desktop tray menu.
+ * dsh-tray-restart — add "Restart" and "Reload Page" items to the DeepSeek Harness desktop tray menu.
  *
  * The official desktop shell (Electron main process) owns the Windows system
  * tray. DSH plugins run in the Host child process behind Cordis and have no
