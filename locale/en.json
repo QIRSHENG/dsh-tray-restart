@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Tray Restart",
+    "description": "Adds a \"Restart App and Host\" item to the Windows system-tray menu of the official desktop app, and re-applies that patch after every desktop update."
+  }
+}

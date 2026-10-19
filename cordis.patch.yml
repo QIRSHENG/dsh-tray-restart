@@ -1,0 +1,6 @@
+# dsh-tray-restart bundle patch: mount the tray-patch row.
+# The row only acts on Windows and does nothing when the desktop app is absent.
+
+- insert:
+    - id: dsh-tray-restart
+      name: dsh-tray-restart

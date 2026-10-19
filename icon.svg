@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Tray Restart">
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#1b2333"/>
+  <path d="M32 12c-9.4 0-17 6.8-17 15.2h7.4c0-4.6 4.3-8.3 9.6-8.3 5.3 0 9.6 3.7 9.6 8.3 0 4.5-4.3 8.2-9.6 8.2h-2.2l.1 7.3H32c9.4 0 17-6.8 17-15.2S41.4 12 32 12z" fill="#6ea8fe"/>
+  <path d="M19.6 27.2 12 33.5l8.8 5.4z" fill="#6ea8fe"/>
+  <rect x="14" y="43" width="36" height="4" rx="2" fill="#e6edf7"/>
+  <rect x="14" y="50" width="22" height="4" rx="2" fill="#8b9bb4"/>
+</svg>
