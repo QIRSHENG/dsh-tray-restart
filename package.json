@@ -4,7 +4,7 @@
   "description": "Adds Restart and Reload (refresh frontend) items to the DeepSeek Harness desktop system-tray menu and re-applies the patch after every app update.",
   "type": "module",
   "license": "MIT",
-  "author": "Paint-RS",
+  "author": "QIRSHENG",
   "homepage": "https://github.com/QIRSHENG/dsh-tray-restart#readme",
   "repository": {
     "type": "git",
