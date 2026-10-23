@@ -16,7 +16,7 @@
  */
 
 import { spawn } from 'node:child_process'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -130,6 +130,22 @@ function runPatcher(command, asar) {
 }
 
 /**
+ * Copy the force-quit helper next to the saved original, where the tray item
+ * looks for it. The menu patch hardcodes this path, so it must exist before
+ * the user clicks "彻底退出 Harness".
+ * @param ctx - this plugin's Cordis context.
+ */
+function installQuitScript(ctx) {
+  try {
+    mkdirSync(STATE_DIR, { recursive: true })
+    const source = readFileSync(join(PACKAGE_ROOT, 'quit-all.ps1'), 'utf8')
+    writeFileSync(join(STATE_DIR, 'quit-all.ps1'), source)
+  } catch (error) {
+    log(ctx, 'warn', `could not install quit-all.ps1: ${error?.message ?? String(error)}`)
+  }
+}
+
+/**
  * Patch the desktop shell once per Host start. Safe and idempotent: a re-run
  * against an already patched archive is a read-only status check.
  * @param ctx - this plugin's Cordis context.
@@ -139,6 +155,7 @@ export function apply(ctx) {
     log(ctx, 'info', 'skipped: the system tray item is Windows-only')
     return
   }
+  installQuitScript(ctx)
   const asar = process.env.DSH_DESKTOP_APP_ASAR
   ctx.effect(() => {
     const configured = Number.parseInt(process.env.DSH_TRAY_RESTART_DELAY_MS ?? '', 10)

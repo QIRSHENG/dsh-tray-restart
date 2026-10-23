@@ -1,14 +1,14 @@
 # dsh-tray-restart
 
-给 **DeepSeek Harness 官方桌面端** 的 Windows 系统托盘（任务栏通知区）右键菜单加两项：
-**「重启应用与 Host」** 和 **「刷新页面」**（刷新前端），并在桌面端每次自动更新覆盖
-`app.asar` 之后自动重打补丁。
+给 **DeepSeek Harness 官方桌面端** 的 Windows 系统托盘（任务栏通知区）右键菜单加三项：
+**「重启应用与 Host」**、**「刷新页面」**（刷新前端）和 **「彻底退出 Harness」**（结束所有
+Harness 进程），并在桌面端每次自动更新覆盖 `app.asar` 之后自动重打补丁。
 
-Adds **Restart App and Host** and **Reload Page** (refresh the frontend) items to the
-Windows system-tray menu of the official DeepSeek Harness desktop shell, and re-applies
-the patch after every desktop update.
+Adds **Restart App and Host**, **Reload Page** (refresh the frontend) and **Force Quit**
+(kill every Harness process) items to the Windows system-tray menu of the official
+DeepSeek Harness desktop shell, and re-applies the patch after every desktop update.
 
-![tray menu: Open / Restart App and Host / Reload Page / Exit](https://img.shields.io/badge/tray%20menu-Open%20%7C%20Restart%20%7C%20Reload%20Page%20%7C%20Exit-6ea8fe)
+![tray menu: Open / Restart / Reload Page / Force Quit / Exit](https://img.shields.io/badge/tray%20menu-Open%20%7C%20Restart%20%7C%20Reload%20%7C%20Force%20Quit%20%7C%20Exit-6ea8fe)
 
 ---
 
@@ -29,6 +29,7 @@ the patch after every desktop update.
 重启应用与 Host          ← 新增
 刷新页面                 ← 新增（刷新前端，Host 不重启）
 ────────────
+彻底退出 Harness         ← 新增（结束所有 Harness 进程）
 退出 DeepSeek Harness
 ```
 
@@ -36,8 +37,12 @@ the patch after every desktop update.
   里的同名项一致——干净退出 Host、重启整个应用，不弹“任务仍在运行”的确认框。
 * **刷新页面**：对主窗口执行 `webContents.reload()`，等价于前台按 `Ctrl+R`。只重载前端页面，
   Host、会话和正在跑的任务都不受影响；前端改坏了、白屏或要重新加载界面时用。
+* **彻底退出 Harness**：先正常请求退出，同时启动一个脱离应用进程的 PowerShell 清理脚本
+  （`%USERPROFILE%\.dsh\dsh-tray-restart\quit-all.ps1`，插件启动时写入）。脚本等待约 1.2 秒后
+  强制结束所有匹配的进程：桌面端 Electron 全部进程、`dsh-desktop-host`、`%LOCALAPPDATA%\Programs\DeepSeek Harness\` 下的运行时、`.dsh\profiles` 启动的子进程、rea / Windows-MCP / GitHub-MCP
+  以及 `@dsh-ops` 启动的 shell。
 
-两项都复用官方已有的本地化文案（`messages.restartAppHostMenu` / `messages.reloadPageMenu`），
+前两项复用官方已有的本地化文案（`messages.restartAppHostMenu` / `messages.reloadPageMenu`），
 中英文随系统语言切换。
 
 ## 安装 / Install

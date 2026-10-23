@@ -19,7 +19,12 @@ import { apply, buildPatched, restore, status } from '../lib/patcher.mjs'
 /** A minimal main.js carrying the stock tray template. */
 const STOCK_MAIN = `import { app, Menu, Tray } from "electron";
 /** Windows system tray: the always-present way back to a hidden window and the explicit quit entry. */
+/** Tray icon present for the whole run, not only while the window is hidden. */
 var DesktopTray = class {
+	/** @param options - Icon path, locale reader, and the open and quit actions. */
+	constructor(options) {
+		this.options = options;
+	}
 	/** Rebuild the tooltip and context menu in the current locale. */
 	relabel() {
 		const { messages } = this.options.locale();
@@ -39,7 +44,10 @@ var DesktopTray = class {
 			}
 		]));
 	}
+	/** Remove the icon; called once the quit is confirmed so no dead icon outlives the process. */
+	dispose() {}
 };
+/** One-time Windows confirmation before hiding the application in the tray. */
 export {};
 `
 
@@ -102,6 +110,8 @@ test('buildPatched keeps the byte length and is idempotent', () => {
   assert.match(text, /app\.relaunch\(\);quitWithoutConfirmation\(\)/)
   assert.match(text, /reloadPageMenu/)
   assert.match(text, /webContents\.reload\(\)/)
+  assert.match(text, /quit-all\.ps1/)
+  assert.match(text, /彻底退出 Harness/)
   assert.equal(buildPatched(first.bytes).state, 'patched')
 })
 
@@ -122,6 +132,28 @@ test('upgrades a 1.0.x restart-only patch in place', () => {
   const text = upgraded.bytes.toString('utf8')
   assert.match(text, /messages\.restartAppHostMenu/)
   assert.match(text, /messages\.reloadPageMenu/)
+  assert.match(text, /quit-all\.ps1/)
+  assert.equal(buildPatched(upgraded.bytes).state, 'patched')
+})
+
+test('upgrades a 1.1.x restart+reload patch in place', () => {
+  const stock = Buffer.from(STOCK_MAIN, 'utf8')
+  const V2_CALL = 'tray.setContextMenu(Menu.buildFromTemplate([{label:messages.openApplication,' +
+    'click:this.options.open},{label:messages.restartAppHostMenu,' +
+    'click:()=>{app.relaunch();quitWithoutConfirmation()}},' +
+    '{label:messages.reloadPageMenu,' +
+    'click:()=>{const w=BrowserWindow.getAllWindows()[0];if(w&&!w.isDestroyed())w.webContents.reload()}},' +
+    '{type:"separator"},{label:messages.quitApplication,click:this.options.quit}]));'
+  const stockCall = stock.toString('utf8').match(/tray\.setContextMenu\(Menu\.buildFromTemplate\(\[[\s\S]{0,2000}?\]\)\);/)[0]
+  const v2Text = stock.toString('utf8').replace(stockCall, V2_CALL)
+  const v2 = Buffer.from(v2Text, 'utf8')
+
+  const upgraded = buildPatched(v2)
+  assert.equal(upgraded.state, 'stock')
+  assert.equal(upgraded.bytes.length, v2.length)
+  const text = upgraded.bytes.toString('utf8')
+  assert.match(text, /quit-all\.ps1/)
+  assert.match(text, /彻底退出 Harness/)
   assert.equal(buildPatched(upgraded.bytes).state, 'patched')
 })
 
@@ -140,6 +172,7 @@ test('apply patches, refreshes integrity, and leaves other entries intact', () =
     const main = readEntry(path, 'lib/main.js')
     assert.equal(main.bytes.length, mainBytes.length)
     assert.match(main.bytes.toString('utf8'), /restartAppHostMenu/)
+    assert.match(main.bytes.toString('utf8'), /quit-all\.ps1/)
 
     const digest = createHash('sha256').update(main.bytes).digest('hex')
     assert.equal(main.header.integrity.hash, digest)

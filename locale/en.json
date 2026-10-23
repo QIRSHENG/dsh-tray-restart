@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Tray Restart & Reload",
-    "description": "Adds \"Restart App and Host\" and \"Reload Page\" items to the Windows system-tray menu of the official desktop app, and re-applies that patch after every desktop update."
+    "title": "Tray Actions",
+    "description": "Adds Restart App and Host, Reload Page and Force Quit (kill every Harness process) to the Windows system-tray menu of the official desktop app, and re-applies that patch after every desktop update."
   }
 }
